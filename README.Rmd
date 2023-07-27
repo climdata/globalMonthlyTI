@@ -8,46 +8,19 @@ output:
   pdf_document: default
 ---
 
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
 ## Work with yearly and moving/rolling 30y normalization
 
-
-```r
+```{r rolling-norm-30, echo=TRUE}
 require("ggplot2")
-```
-
-```
-## Loading required package: ggplot2
-```
-
-```
-## Registered S3 methods overwritten by 'tibble':
-##   method     from  
-##   format.tbl pillar
-##   print.tbl  pillar
-```
-
-```r
 color.temperature <- c("#0000FF", "#00CCCC", "#FFFFFF", "#EEAA33", "#FF5555")
 #install.packages("data.table")
 library(data.table)
 #install.packages("zoo")
 library(zoo)
-```
-
-```
-## 
-## Attaching package: 'zoo'
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     as.Date, as.Date.numeric
-```
-
-```r
 library(rollRegres)
 
 
@@ -91,11 +64,7 @@ mp + geom_raster(aes(fill=land.ind))+
   scale_y_continuous(breaks=c(1,6,12))+
   theme(panel.background = element_rect(fill = '#EEEEEE', colour = 'white'), legend.position="right", text=element_text(size=14))+
   scale_fill_gradientn(colours=color.temperature)
-```
 
-![](README_files/figure-html/rolling-norm-30-1.png)<!-- -->
-
-```r
 #hist(norm$temperature)
 
 names(tia30)[names(tia30) == "land.ind"] <- "tia30.land"
@@ -107,8 +76,8 @@ tia30$temperature = NULL
 
 ## Work with yearly and moving/rolling 10y normalization
 
+```{r rolling-norm-10, echo=TRUE}
 
-```r
 tia10 <- rollingAVG(tmDwd,1,10,'land')
 for (mont in c(2,3,4,5,6,7,8,9,10,11,12)) {
   tmp <-rollingAVG(tmDwd,mont,10,'land')
@@ -133,25 +102,21 @@ mp + geom_raster(aes(fill=land.ind))+
   scale_y_continuous(breaks=c(1,6,12))+
   theme(panel.background = element_rect(fill = '#EEEEEE', colour = 'white'), legend.position="right", text=element_text(size=14))+
   scale_fill_gradientn(colours=color.temperature)
-```
 
-![](README_files/figure-html/rolling-norm-10-1.png)<!-- -->
-
-```r
 #hist(norm$temperature)
 
 names(tia10)[names(tia10) == "land.ind"] <- "tia10.land"
 names(tia10o)[names(tia10o) == "ocean.ind"] <- "tia10.ocean"
 tia10$temperature = NULL
 #tia10 <- tia10[order(tia10$ts),]
+
 ```
 
 
 
 ## Work with yearly and moving/rolling 10y linearization
 
-
-```r
+```{r rolling-glm-10, echo=TRUE}
 #install.packages("data.table")
 
 rollingGLM <- function(data, mon, wid) {
@@ -191,11 +156,7 @@ mp + geom_raster(aes(fill=ind))+
   scale_y_continuous(breaks=c(1,6,12))+
   theme(panel.background = element_rect(fill = '#EEEEEE', colour = 'white'), legend.position="right", text=element_text(size=14))+
   scale_fill_gradientn(colours=color.temperature)
-```
 
-![](README_files/figure-html/rolling-glm-10-1.png)<!-- -->
-
-```r
 #hist(norm$temperature)
 #hist(norm$ind)
 
@@ -208,8 +169,8 @@ til10$temperature = NULL
 
 ## Work with yearly and moving/rolling 30y linearization
 
+```{r rolling-glm-30, echo=TRUE}
 
-```r
 tmDwd$temperature = tmDwd$land
 til30 <- rollingGLM(tmDwd,1,30)
 for (mont in c(2,3,4,5,6,7,8,9,10,11,12)) {
@@ -232,11 +193,7 @@ mp + geom_raster(aes(fill=ind))+
   scale_y_continuous(breaks=c(1,6,12))+
   theme(panel.background = element_rect(fill = '#EEEEEE', colour = 'white'), legend.position="right", text=element_text(size=14))+
   scale_fill_gradientn(colours=color.temperature)
-```
 
-![](README_files/figure-html/rolling-glm-30-1.png)<!-- -->
-
-```r
 #hist(norm$temperature)
 #hist(norm$ind)
 
@@ -249,8 +206,8 @@ til30$temperature = NULL
 
 ## Work with yearly and fixed normalization
 
+```{r fixed-norm, echo=TRUE}
 
-```r
 tmDwd$temperature = tmDwd$land
 tis99 <-  subset(tmDwd, (tmDwd$year>1752 & tmDwd$month == 1)) 
 
@@ -291,24 +248,21 @@ mp + geom_raster(aes(fill=ind))+
   scale_y_continuous(breaks=c(1,6,12))+
   theme(panel.background = element_rect(fill = '#EEEEEE', colour = 'white'), legend.position="right", text=element_text(size=14))+
   scale_fill_gradientn(colours=color.temperature)
-```
 
-![](README_files/figure-html/fixed-norm-1.png)<!-- -->
-
-```r
 #hist(norm$temperature)
 
 names(tis99)[names(tis99) == "ind"] <- "tis99.land"
 names(tis99o)[names(tis99o) == "ind"] <- "tis99.ocean"
 tis99$temperature = NULL
 #tis99 <- tis99[order(tis99$ts),]
+
 ```
 
 
 ## Combine indices and store
 
+```{r store-csv, echo=TRUE}
 
-```r
 tis99 <- tis99[, c("year","month","tis99.land")]
 tia30 <- tia30[, c("year","month","tia30.land")]
 tia10 <- tia10[, c("year","month","tia10.land")]
@@ -341,13 +295,17 @@ tiAll <- tiAll[order(tiAll$ts),]
 write.table(tiAll, file = "csv/ti_global.csv", append = FALSE, quote = TRUE, sep = ",",
             eol = "\n", na = "NA", dec = ".", row.names = FALSE,
             col.names = TRUE, qmethod = "escape", fileEncoding = "UTF-8")
+
+
+
+
+
 ```
 
 
 ## Calculate multi-monthly indices and store
 
-
-```r
+```{r multi-month, echo=TRUE}
 tiMulti = tis99
 names(tiMulti)[names(tiMulti) == "tis99.land"] <- "sti1"
 
@@ -370,12 +328,12 @@ tiMulti <- tiMulti[order(tiMulti$ts),]
 write.table(tiMulti, file = "csv/sti_de.csv", append = FALSE, quote = TRUE, sep = ",",
             eol = "\n", na = "NA", dec = ".", row.names = FALSE,
             col.names = TRUE, qmethod = "escape", fileEncoding = "UTF-8")
+
 ```
 
 ## Plot monthly 
 
-
-```r
+```{r plot_ol, echo=TRUE}
 require("ggplot2")
 temp <- read.csv("./csv/ti_global.csv", sep=",")
 
@@ -384,41 +342,25 @@ mp <- ggplot() +
       geom_line(aes(y=temp$tis99.land, x=temp$ts), color="brown") +  
       xlab("Year") + ylab("tis99 ")
 mp
-```
 
-![](README_files/figure-html/plot_ol-1.png)<!-- -->
-
-```r
 mp <- ggplot() +
       geom_line(aes(y=temp$tia30.ocean, x=temp$ts), color="blue") +
       geom_line(aes(y=temp$tia30.land, x=temp$ts), color="brown") +  
       xlab("Year") + ylab("tia30 ")
 mp
-```
 
-![](README_files/figure-html/plot_ol-2.png)<!-- -->
-
-```r
 mp <- ggplot() +
       geom_line(aes(y=temp$tia10.ocean, x=temp$ts), color="blue") +
       geom_line(aes(y=temp$tia10.land, x=temp$ts), color="brown") +  
       xlab("Year") + ylab("tia10 ")
 mp
-```
 
-![](README_files/figure-html/plot_ol-3.png)<!-- -->
-
-```r
 mp <- ggplot() +
       geom_line(aes(y=temp$til30.ocean, x=temp$ts), color="blue") +
       geom_line(aes(y=temp$til30.land, x=temp$ts), color="brown") +  
       xlab("Year") + ylab("til30 ")
 mp
-```
 
-![](README_files/figure-html/plot_ol-4.png)<!-- -->
-
-```r
 mp <- ggplot() +
       geom_line(aes(y=temp$til10.ocean, x=temp$ts), color="blue") +
       geom_line(aes(y=temp$til10.land, x=temp$ts), color="brown") +  
@@ -426,12 +368,9 @@ mp <- ggplot() +
 mp
 ```
 
-![](README_files/figure-html/plot_ol-5.png)<!-- -->
-
 ## xxx
 
-
-```r
+```{r plot_mode, echo=TRUE}
 require("ggplot2")
 temp <- read.csv("./csv/ti_global.csv", sep=",")
 
@@ -443,11 +382,7 @@ mp <- ggplot() +
       geom_line(aes(y=temp$tis99.land, x=temp$ts), color="blue") +
       xlab("Year") + ylab("land ")
 mp
-```
 
-![](README_files/figure-html/plot_mode-1.png)<!-- -->
-
-```r
 mp <- ggplot() +
       geom_line(aes(y=temp$til30.ocean, x=temp$ts), color="green") +  
       geom_line(aes(y=temp$tia10.ocean, x=temp$ts), color="cyan") +  
@@ -456,6 +391,6 @@ mp <- ggplot() +
       geom_line(aes(y=temp$tis99.ocean, x=temp$ts), color="blue") +
       xlab("Year") + ylab("ocean ")
 mp
-```
 
-![](README_files/figure-html/plot_mode-2.png)<!-- -->
+
+```
